@@ -1,0 +1,158 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String   @default("")
+  role      String   @default("USER") // USER, MODERATOR, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  wishlists Wishlist[]
+  favorites UserFavorite[]
+  alerts    UserAlert[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// Xbox Game model
+model Game {
+  id            String   @id @default(cuid())
+  xboxGameId    String   @unique // Xbox Store ID
+  title         String
+  description   String   @default("")
+  coverArt      String   @default("")
+  genre         String   @default("Unknown")
+  publisher     String   @default("Unknown")
+  developer     String   @default("Unknown")
+  releaseDate   DateTime?
+  xboxStoreUrl  String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  priceHistory  PriceHistory[]
+  predictions   Prediction[]
+  wishlists    Wishlist[]
+  favorites     UserFavorite[]
+
+  @@index([title])
+  @@index([genre])
+  @@index([xboxGameId])
+  @@map("games")
+}
+
+// Price History model
+model PriceHistory {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  price     Float
+  discount  Float    @default(0) // Discount percentage
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@index([gameId])
+  @@index([date])
+  @@unique([gameId, date])
+  @@map("price_history")
+}
+
+// Prediction model
+model Prediction {
+  id                 String   @id @default(cuid())
+  gameId             String
+  game               Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  nextSaleDate       DateTime
+  estimatedDiscount  Float
+  estimatedPrice     Float
+  confidence         Int      // 0-100
+  saleIntervalDays   Int
+  analysisMetadata   Json     @default("{}")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([gameId])
+  @@index([nextSaleDate])
+  @@index([confidence])
+  @@map("predictions")
+}
+
+// User Wishlist model
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, gameId])
+  @@index([userId])
+  @@index([gameId])
+  @@map("wishlists")
+}
+
+// User Favorites model
+model UserFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId    String
+  game      Game     @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, gameId])
+  @@index([userId])
+  @@index([gameId])
+  @@map("user_favorites")
+}
+
+// User Alert model
+model UserAlert {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameId       String?
+  alertType    String   // PRICE_DROP, UPCOMING_SALE, GENERAL
+  email        String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([alertType])
+  @@map("user_alerts")
+}
+
+// Sync Log model (for tracking data syncs)
+model SyncLog {
+  id           String   @id @default(cuid())
+  syncType     String   // PRICE_UPDATE, GAME_CATALOG, etc
+  status       String   // PENDING, IN_PROGRESS, SUCCESS, FAILED
+  itemsProcessed Int    @default(0)
+  itemsFailed  Int      @default(0)
+  errorMessage String   @default("")
+  startedAt    DateTime @default(now())
+  completedAt  DateTime?
+  duration      Int?    // in milliseconds
+
+  @@index([syncType])
+  @@index([status])
+  @@index([startedAt])
+  @@map("sync_logs")
+}

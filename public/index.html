@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xbox Sale Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(to bottom right, #111827, #1f2937, #111827);
+            color: #f3f4f6;
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: #1f2937;
+            border-bottom: 1px solid #374151;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #13b13f;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #f3f4f6;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #13b13f;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(to right, #13b13f, #107c10);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: #9ca3af;
+            margin-bottom: 2rem;
+        }
+
+        /* Search Bar */
+        .search-container {
+            max-width: 42rem;
+            margin: 0 auto 3rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #374151;
+            border: 1px solid #4b5563;
+            color: #f3f4f6;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #13b13f;
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #374151;
+            border: 1px solid #4b5563;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 1rem;
+            border-bottom: 1px solid #4b5563;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item:hover {
+            background-color: #4b5563;
+        }
+
+        .search-result-item.game-title {
+            font-weight: bold;
+            color: #13b13f;
+        }
+
+        /* CTA Buttons */
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #13b13f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #107c10;
+        }
+
+        .btn-secondary {
+            background-color: #374151;
+            color: white;
+            border: 1px solid #4b5563;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        /* Section Titles */
+        h2 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Game Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .game-card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .game-card:hover {
+            border-color: #13b13f;
+            transform: translateY(-4px);
+        }
+
+        .game-card-image {
+            width: 100%;
+            height: 160px;
+            background-color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .game-card-content {
+            padding: 1rem;
+        }
+
+        .game-card-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .game-card:hover .game-card-title {
+            color: #13b13f;
+        }
+
+        .game-card-genre {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: #13b13f;
+        }
+
+        .feature-icon {
+            font-size: 2.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-card p {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        /* Prediction Results */
+        .prediction-header {
+            background-color: #1f2937;
+            border: 2px solid #13b13f;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .prediction-stat {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .prediction-stat-label {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .prediction-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #13b13f;
+        }
+
+        /* Sales List */
+        .sales-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .sale-item {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .sale-item:hover {
+            border-color: #13b13f;
+        }
+
+        .sale-info {
+            flex: 1;
+        }
+
+        .sale-title {
+            font-weight: bold;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sale-date {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+
+        .sale-details {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .sale-discount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #13b13f;
+        }
+
+        .sale-confidence {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #374151;
+            border-top: 4px solid #13b13f;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        footer {
+            background-color: #1f2937;
+            border-top: 1px solid #374151;
+            margin-top: 4rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .sale-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .sale-details {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span>🎮</span>
+                <span>Xbox Sale Predictor</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" onclick="showSection('home')">Home</a></li>
+                <li><a href="#search" onclick="showSection('search')">Search</a></li>
+                <li><a href="#trending" onclick="showSection('trending')">Trending</a></li>
+                <li><a href="#upcoming" onclick="showSection('upcoming')">Upcoming</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="hero">
+                <h1>🎮 Xbox Sale Predictor</h1>
+                <p>Predict when your favorite Xbox games will go on sale</p>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search Xbox games..."
+                    onkeyup="searchGames()"
+                >
+                <div id="searchResults" class="search-results"></div>
+            </div>
+
+            <!-- CTA Buttons -->
+            <div class="cta-buttons">
+                <button class="btn btn-primary" onclick="showSection('trending')">View Trending Deals</button>
+                <button class="btn btn-secondary" onclick="showSection('upcoming')">Upcoming Sales</button>
+            </div>
+
+            <!-- Featured Games -->
+            <h2>Featured Games</h2>
+            <div id="featuredGames" class="games-grid">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+
+            <!-- Features -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Historical Analysis</h3>
+                    <p>Complete price history with detailed analytics for every Xbox game</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI Predictions</h3>
+                    <p>Machine learning powered predictions based on historical patterns</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Smart Alerts</h3>
+                    <p>Get notified when predicted sales happen or new deals are available</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trending Section -->
+        <section id="trending" class="section" style="display: none;">
+            <h1 style="font-size: 2.25rem; margin-bottom: 2rem;">🔥 Trending Deals</h1>
+            <div id="trendingGames" class="games-grid">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </section>
+
+        <!-- Upcoming Sales Section -->
+        <section id="upcoming" class="section" style="display: none;">
+            <h1 style="font-size: 2.25rem; margin-bottom: 2rem;">⏰ Upcoming Predicted Sales</h1>
+            <div id="upcomingSales" class="sales-list">
+                <div class="loading"><div class="spinner"></div></div>
+            </div>
+        </section>
+
+        <!-- Game Detail Section -->
+        <section id="gameDetail" class="section" style="display: none;">
+            <button class="btn btn-secondary" onclick="showSection('home')" style="margin-bottom: 2rem;">← Back</button>
+            <div id="gameDetailContent"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2025 Xbox Sale Predictor. Made with ❤️ for gamers.</p>
+    </footer>
+
+    <script>
+        // Mock Data - In production, this would come from your backend API
+        const mockGames = [
+            {
+                id: '1',
+                title: 'Halo Infinite',
+                genre: 'First-Person Shooter',
+                coverArt: '🎮',
+                description: 'Experience an epic gaming adventure in the Halo universe',
+                currentPrice: 59.99,
+                lowestPrice: 19.99,
+                averagePrice: 45.00,
+                averageDiscount: 35.5,
+                discountFrequency: 45.5
+            },
+            {
+                id: '2',
+                title: 'Starfield',
+                genre: 'Action RPG',
+                coverArt: '🌟',
+                description: 'Explore the vast universe in Starfield',
+                currentPrice: 69.99,
+                lowestPrice: 34.99,
+                averagePrice: 52.00,
+                averageDiscount: 40,
+                discountFrequency: 38
+            },
+            {
+                id: '3',
+                title: 'Forza Motorsport',
+                genre: 'Racing',
+                coverArt: '🏎️',
+                description: 'Ultimate racing experience',
+                currentPrice: 69.99,
+                lowestPrice: 24.99,
+                averagePrice: 48.00,
+                averageDiscount: 42,
+                discountFrequency: 52
+            },
+            {
+                id: '4',
+                title: 'Minecraft',
+                genre: 'Sandbox',
+                coverArt: '⛏️',
+                description: 'Build, explore, and survive',
+                currentPrice: 29.99,
+                lowestPrice: 14.99,
+                averagePrice: 22.00,
+                averageDiscount: 30,
+                discountFrequency: 35
+            },
+            {
+                id: '5',
+                title: 'Elden Ring',
+                genre: 'Action RPG',
+                coverArt: '⚔️',
+                description: 'Dark fantasy adventure',
+                currentPrice: 59.99,
+                lowestPrice: 29.99,
+                averagePrice: 44.00,
+                averageDiscount: 38,
+                discountFrequency: 40
+            },
+            {
+                id: '6',
+                title: 'Game Pass',
+                genre: 'Subscription',
+                coverArt: '🎫',
+                description: 'Play hundreds of games',
+                currentPrice: 16.99,
+                lowestPrice: 1.00,
+                averagePrice: 10.00,
+                averageDiscount: 50,
+                discountFrequency: 60
+            }
+        ];
+
+        const mockPredictions = [
+            {
+                id: '1',
+                gameId: '1',
+                title: 'Halo Infinite',
+                nextSaleDate: '2025-02-15',
+                estimatedDiscount: 35,
+                estimatedPrice: 38.99,
+                confidence: 85
+            },
+            {
+                id: '2',
+                gameId: '2',
+                title: 'Starfield',
+                nextSaleDate: '2025-02-20',
+                estimatedDiscount: 40,
+                estimatedPrice: 41.99,
+                confidence: 78
+            },
+            {
+                id: '3',
+                gameId: '3',
+                title: 'Forza Motorsport',
+                nextSaleDate: '2025-02-10',
+                estimatedDiscount: 42,
+                estimatedPrice: 40.59,
+                confidence: 88
+            },
+            {
+                id: '4',
+                gameId: '5',
+                title: 'Elden Ring',
+                nextSaleDate: '2025-02-25',
+                estimatedDiscount: 38,
+                estimatedPrice: 37.19,
+                confidence: 72
+            }
+        ];
+
+        // Section Management
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show selected section
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = 'block';
+                window.scrollTo(0, 0);
+
+                // Load data based on section
+                if (sectionId === 'home') {
+                    loadFeaturedGames();
+                } else if (sectionId === 'trending') {
+                    loadTrendingGames();
+                } else if (sectionId === 'upcoming') {
+                    loadUpcomingSales();
+                }
+            }
+        }
+
+        // Load Featured Games
+        function loadFeaturedGames() {
+            const container = document.getElementById('featuredGames');
+            container.innerHTML = '';
+
+            mockGames.slice(0, 6).forEach(game => {
+                container.innerHTML += `
+                    <div class="game-card" onclick="showGameDetail('${game.id}')">
+                        <div class="game-card-image">${game.coverArt}</div>
+                        <div class="game-card-content">
+                            <div class="game-card-title">${game.title}</div>
+                            <div class="game-card-genre">${game.genre}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Load Trending Games
+        function loadTrendingGames() {
+            const container = document.getElementById('trendingGames');
+            container.innerHTML = '';
+
+            mockGames.forEach(game => {
+                container.innerHTML += `
+                    <div class="game-card" onclick="showGameDetail('${game.id}')">
+                        <div class="game-card-image">${game.coverArt}</div>
+                        <div class="game-card-content">
+                            <div class="game-card-title">${game.title}</div>
+                            <div class="game-card-genre">${game.genre}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Load Upcoming Sales
+        function loadUpcomingSales() {
+            const container = document.getElementById('upcomingSales');
+            container.innerHTML = '';
+
+            mockPredictions.forEach(pred => {
+                const date = new Date(pred.nextSaleDate).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+
+                container.innerHTML += `
+                    <div class="sale-item" onclick="showGameDetail('${pred.gameId}')">
+                        <div class="sale-info">
+                            <div class="sale-title">${pred.title}</div>
+                            <div class="sale-date">Expected: ${date}</div>
+                        </div>
+                        <div class="sale-details">
+                            <div class="sale-discount">${pred.estimatedDiscount}% off</div>
+                            <div class="sale-confidence">Confidence: ${pred.confidence}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Show Game Detail
+        function showGameDetail(gameId) {
+            const game = mockGames.find(g => g.id === gameId);
+            const prediction = mockPredictions.find(p => p.gameId === gameId);
+
+            if (!game) return;
+
+            const detailContent = document.getElementById('gameDetailContent');
+            detailContent.innerHTML = `
+                <div class="prediction-header">
+                    <div style="display: flex; gap: 2rem; align-items: start;">
+                        <div style="font-size: 4rem;">${game.coverArt}</div>
+                        <div style="flex: 1; text-align: left;">
+                            <h1 style="font-size: 2.25rem; margin-bottom: 1rem;">${game.title}</h1>
+                            <p style="color: #9ca3af; margin-bottom: 1rem;">${game.description}</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <p style="color: #9ca3af; font-size: 0.875rem;">Genre</p>
+                                    <p style="font-size: 1.125rem; font-weight: bold;">${game.genre}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>Price Statistics</h2>
+                <div class="prediction-grid">
+                    <div class="prediction-stat">
+                        <div class="prediction-stat-label">Current Price</div>
+                        <div class="prediction-stat-value">$${game.currentPrice.toFixed(2)}</div>
+                    </div>
+                    <div class="prediction-stat">
+                        <div class="prediction-stat-label">Lowest Price</div>
+                        <div class="prediction-stat-value">$${game.lowestPrice.toFixed(2)}</div>
+                    </div>
+                    <div class="prediction-stat">
+                        <div class="prediction-stat-label">Avg. Discount</div>
+                        <div class="prediction-stat-value">${game.averageDiscount.toFixed(1)}%</div>
+                    </div>
+                    <div class="prediction-stat">
+                        <div class="prediction-stat-label">Discount Freq.</div>
+                        <div class="prediction-stat-value">${game.discountFrequency.toFixed(1)}%</div>
+                    </div>
+                </div>
+
+                ${prediction ? `
+                    <h2 style="margin-top: 3rem;">Sale Prediction</h2>
+                    <div class="prediction-header">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem;">
+                            <div>
+                                <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.5rem;">Next Expected Sale</p>
+                                <p style="font-size: 1.25rem; font-weight: bold;">${new Date(prediction.nextSaleDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                            </div>
+                            <div>
+                                <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.5rem;">Est. Discount</p>
+                                <p style="font-size: 1.875rem; font-weight: bold; color: #13b13f;">${prediction.estimatedDiscount}%</p>
+                            </div>
+                            <div>
+                                <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.5rem;">Est. Sale Price</p>
+                                <p style="font-size: 1.875rem; font-weight: bold;">$${prediction.estimatedPrice.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.5rem;">Confidence</p>
+                                <p style="font-size: 1.875rem; font-weight: bold; color: #13b13f;">${prediction.confidence}%</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+
+            showSection('gameDetail');
+        }
+
+        // Search Games
+        function searchGames() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+
+            if (query.length < 2) {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+
+            const results = mockGames.filter(game =>
+                game.title.toLowerCase().includes(query) ||
+                game.genre.toLowerCase().includes(query)
+            );
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<div class="search-result-item">No games found</div>';
+            } else {
+                resultsContainer.innerHTML = results.map(game => `
+                    <div class="search-result-item" onclick="showGameDetail('${game.id}'); document.getElementById('searchInput').value = '';">
+                        <div class="search-result-item game-title">${game.title}</div>
+                        <div style="color: #9ca3af; font-size: 0.875rem;">${game.genre}</div>
+                    </div>
+                `).join('');
+            }
+
+            resultsContainer.classList.add('active');
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('searchResults').classList.remove('active');
+            }
+        });
+
+        // Load home section on page load
+        window.addEventListener('load', () => {
+            loadFeaturedGames();
+        });
+    </script>
+</body>
+</html>

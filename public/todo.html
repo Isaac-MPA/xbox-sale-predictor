@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Input Section */
+        .input-section {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: #9ca3af;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Filter Buttons */
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 2px solid transparent;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover {
+            background-color: #e5e7eb;
+        }
+
+        .filter-btn.active {
+            background-color: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Todo List */
+        .todo-list {
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .todo-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .todo-list::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .todo-list::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .todo-list::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .todo-item:hover {
+            background-color: #f3f4f6;
+            transform: translateX(4px);
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .todo-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .todo-text {
+            font-size: 1rem;
+            color: #1f2937;
+            word-break: break-word;
+            margin-bottom: 0.25rem;
+        }
+
+        .todo-date {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .todo-priority {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-left: 0.5rem;
+        }
+
+        .priority-high {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-low {
+            background-color: #dbeafe;
+            color: #0c2d6b;
+        }
+
+        .todo-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-delete {
+            padding: 0.5rem;
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-delete:hover {
+            background-color: #fecaca;
+        }
+
+        .btn-edit {
+            padding: 0.5rem;
+            background-color: #dbeafe;
+            color: #0c2d6b;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-edit:hover {
+            background-color: #bfdbfe;
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            color: #9ca3af;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-footer {
+            padding: 0.5rem 1rem;
+            background-color: white;
+            color: #667eea;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-footer:hover {
+            border-color: #667eea;
+            background-color: #f3f4f6;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .modal-actions .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-actions .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-actions .btn-cancel {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-actions .btn-cancel:hover {
+            background-color: #d1d5db;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stats {
+                flex-direction: row;
+                gap: 1rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                justify-content: center;
+            }
+
+            .todo-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .todo-actions {
+                align-self: flex-end;
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+
+        /* Drag and Drop */
+        .todo-item.dragging {
+            opacity: 0.5;
+        }
+
+        .todo-item.drag-over {
+            border-top: 3px solid #667eea;
+            padding-top: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>✅ My To-Do List</h1>
+            <p>Stay organized and productive</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalCount">0</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="completedCount">0</span>
+                    <span class="stat-label">Completed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="pendingCount">0</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="todoInput"
+                    class="input-field"
+                    placeholder="Add a new task..."
+                    autocomplete="off"
+                >
+                <button class="btn" onclick="addTodo()">Add</button>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="filter-group">
+                <button class="filter-btn active" onclick="filterTodos('all')">All</button>
+                <button class="filter-btn" onclick="filterTodos('active')">Active</button>
+                <button class="filter-btn" onclick="filterTodos('completed')">Completed</button>
+                <button class="filter-btn" onclick="filterTodos('high')">High Priority</button>
+            </div>
+        </div>
+
+        <!-- Todo List -->
+        <div class="todo-list" id="todoList">
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <p>No tasks yet.</p>
+                <p>Add one to get started!</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <button class="btn-footer" onclick="openModal()">⚙️ Settings</button>
+            <button class="btn-footer" onclick="exportTodos()">📥 Export</button>
+            <button class="btn-footer" onclick="importTodos()">📤 Import</button>
+            <button class="btn-footer" onclick="clearCompleted()">🗑️ Clear Done</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Settings</div>
+            <div class="form-group">
+                <label class="form-label">Theme</label>
+                <select id="themeSelect" class="form-select" onchange="changeTheme()">
+                    <option value="purple">Purple (Default)</option>
+                    <option value="blue">Blue</option>
+                    <option value="green">Green</option>
+                    <option value="pink">Pink</option>
+                    <option value="orange">Orange</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Sort By</label>
+                <select id="sortSelect" class="form-select" onchange="changeSortOrder()">
+                    <option value="date-desc">Newest First</option>
+                    <option value="date-asc">Oldest First</option>
+                    <option value="priority">Priority (High to Low)</option>
+                    <option value="alphabetical">A to Z</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    <input type="checkbox" id="notificationToggle" onchange="toggleNotifications()">
+                    Enable notifications
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Edit Task</div>
+            <div class="form-group">
+                <label class="form-label">Task</label>
+                <input type="text" id="editInput" class="form-input">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Priority</label>
+                <select id="editPriority" class="form-select">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Due Date</label>
+                <input type="date" id="editDueDate" class="form-input">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-save" onclick="saveEdit()">Save</button>
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme configuration
+        const themes = {
+            purple: { primary: '#667eea', secondary: '#764ba2' },
+            blue: { primary: '#3b82f6', secondary: '#1e40af' },
+            green: { primary: '#10b981', secondary: '#059669' },
+            pink: { primary: '#ec4899', secondary: '#be185d' },
+            orange: { primary: '#f97316', secondary: '#ea580c' }
+        };
+
+        // App State
+        let todos = [];
+        let currentFilter = 'all';
+        let currentSort = 'date-desc';
+        let editingId = null;
+        let notificationsEnabled = true;
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTodos();
+            updateStats();
+            renderTodos();
+            loadSettings();
+
+            // Enter key support
+            document.getElementById('todoInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTodo();
+            });
+
+            // Load theme
+            const savedTheme = localStorage.getItem('theme') || 'purple';
+            document.getElementById('themeSelect').value = savedTheme;
+            applyTheme(savedTheme);
+        });
+
+        // Load todos from localStorage
+        function loadTodos() {
+            const saved = localStorage.getItem('todos');
+            todos = saved ? JSON.parse(saved) : [];
+        }
+
+        // Save todos to localStorage
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        // Load settings
+        function loadSettings() {
+            const savedTheme = localStorage.getItem('theme') || 'purple';
+            const savedSort = localStorage.getItem('sortOrder') || 'date-desc';
+            const savedNotifications = localStorage.getItem('notifications') !== 'false';
+
+            document.getElementById('themeSelect').value = savedTheme;
+            document.getElementById('sortSelect').value = savedSort;
+            document.getElementById('notificationToggle').checked = savedNotifications;
+
+            currentSort = savedSort;
+            notificationsEnabled = savedNotifications;
+        }
+
+        // Add todo
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+
+            if (!text) {
+                alert('Please enter a task!');
+                return;
+            }
+
+            const todo = {
+                id: Date.now(),
+                text: text,
+                completed: false,
+                priority: 'medium',
+                dueDate: null,
+                createdAt: new Date().toISOString()
+            };
+
+            todos.unshift(todo);
+            saveTodos();
+            updateStats();
+            renderTodos();
+            input.value = '';
+            input.focus();
+
+            if (notificationsEnabled) {
+                showNotification(`Task added: ${text}`);
+            }
+        }
+
+        // Toggle todo completion
+        function toggleTodo(id) {
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveTodos();
+                updateStats();
+                renderTodos();
+            }
+        }
+
+        // Delete todo
+        function deleteTodo(id) {
+            if (confirm('Delete this task?')) {
+                todos = todos.filter(t => t.id !== id);
+                saveTodos();
+                updateStats();
+                renderTodos();
+            }
+        }
+
+        // Open edit modal
+        function openEditModal(id) {
+            const todo = todos.find(t => t.id === id);
+            if (!todo) return;
+
+            editingId = id;
+            document.getElementById('editInput').value = todo.text;
+            document.getElementById('editPriority').value = todo.priority;
+            document.getElementById('editDueDate').value = todo.dueDate || '';
+
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        // Save edit
+        function saveEdit() {
+            const todo = todos.find(t => t.id === editingId);
+            if (!todo) return;
+
+            todo.text = document.getElementById('editInput').value.trim();
+            todo.priority = document.getElementById('editPriority').value;
+            todo.dueDate = document.getElementById('editDueDate').value;
+
+            saveTodos();
+            updateStats();
+            renderTodos();
+            closeModal();
+
+            if (notificationsEnabled) {
+                showNotification('Task updated');
+            }
+        }
+
+        // Filter todos
+        function filterTodos(filter) {
+            currentFilter = filter;
+
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            renderTodos();
+        }
+
+        // Change sort order
+        function changeSortOrder() {
+            currentSort = document.getElementById('sortSelect').value;
+            localStorage.setItem('sortOrder', currentSort);
+            renderTodos();
+        }
+
+        // Get filtered and sorted todos
+        function getFilteredAndSortedTodos() {
+            let filtered = todos;
+
+            // Filter
+            switch (currentFilter) {
+                case 'active':
+                    filtered = todos.filter(t => !t.completed);
+                    break;
+                case 'completed':
+                    filtered = todos.filter(t => t.completed);
+                    break;
+                case 'high':
+                    filtered = todos.filter(t => t.priority === 'high');
+                    break;
+            }
+
+            // Sort
+            switch (currentSort) {
+                case 'date-asc':
+                    filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                    break;
+                case 'priority':
+                    const priorityOrder = { high: 0, medium: 1, low: 2 };
+                    filtered.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+                    break;
+                case 'alphabetical':
+                    filtered.sort((a, b) => a.text.localeCompare(b.text));
+                    break;
+                case 'date-desc':
+                default:
+                    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }
+
+            return filtered;
+        }
+
+        // Render todos
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            const filtered = getFilteredAndSortedTodos();
+
+            if (filtered.length === 0) {
+                todoList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">${currentFilter === 'completed' ? '🎉' : '📝'}</div>
+                        <p>No tasks ${currentFilter === 'completed' ? 'completed' : currentFilter === 'active' ? 'to do' : 'found'}.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            todoList.innerHTML = filtered.map(todo => `
+                <div class="todo-item ${todo.completed ? 'completed' : ''}" draggable="true">
+                    <input
+                        type="checkbox"
+                        class="checkbox"
+                        ${todo.completed ? 'checked' : ''}
+                        onchange="toggleTodo(${todo.id})"
+                    >
+                    <div class="todo-content">
+                        <div class="todo-text">
+                            ${escapeHtml(todo.text)}
+                            <span class="todo-priority priority-${todo.priority}">${todo.priority}</span>
+                        </div>
+                        <div class="todo-date">
+                            📅 ${todo.dueDate ? formatDate(todo.dueDate) : 'No due date'}
+                        </div>
+                    </div>
+                    <div class="todo-actions">
+                        <button class="btn-edit" onclick="openEditModal(${todo.id})" title="Edit">✏️</button>
+                        <button class="btn-delete" onclick="deleteTodo(${todo.id})" title="Delete">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = todos.length;
+            const completed = todos.filter(t => t.completed).length;
+            const pending = total - completed;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('pendingCount').textContent = pending;
+        }
+
+        // Clear completed todos
+        function clearCompleted() {
+            const completed = todos.filter(t => t.completed).length;
+            if (completed === 0) {
+                alert('No completed tasks to clear!');
+                return;
+            }
+
+            if (confirm(`Delete ${completed} completed task(s)?`)) {
+                todos = todos.filter(t => !t.completed);
+                saveTodos();
+                updateStats();
+                renderTodos();
+            }
+        }
+
+        // Export todos
+        function exportTodos() {
+            const dataStr = JSON.stringify(todos, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `todos-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Import todos
+        function importTodos() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        if (Array.isArray(imported)) {
+                            const mergeChoice = confirm('Merge with existing tasks? (Cancel to replace)');
+                            if (mergeChoice) {
+                                todos = [...todos, ...imported];
+                            } else {
+                                todos = imported;
+                            }
+                            saveTodos();
+                            updateStats();
+                            renderTodos();
+                            showNotification('Tasks imported successfully!');
+                        }
+                    } catch (err) {
+                        alert('Invalid file format!');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Change theme
+        function changeTheme() {
+            const theme = document.getElementById('themeSelect').value;
+            applyTheme(theme);
+            localStorage.setItem('theme', theme);
+        }
+
+        // Apply theme
+        function applyTheme(theme) {
+            const colors = themes[theme];
+            const style = document.createElement('style');
+            style.textContent = `
+                :root {
+                    --primary: ${colors.primary};
+                    --secondary: ${colors.secondary};
+                }
+                .header,
+                .btn,
+                .btn:hover {
+                    background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%);
+                }
+                .input-field:focus {
+                    border-color: ${colors.primary};
+                    box-shadow: 0 0 0 3px ${colors.primary}33;
+                }
+                .filter-btn.active {
+                    background-color: ${colors.primary};
+                    border-color: ${colors.primary};
+                }
+                .checkbox {
+                    accent-color: ${colors.primary};
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Toggle notifications
+        function toggleNotifications() {
+            notificationsEnabled = document.getElementById('notificationToggle').checked;
+            localStorage.setItem('notifications', notificationsEnabled);
+        }
+
+        // Show notification
+        function showNotification(message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('To-Do List', { body: message });
+            }
+        }
+
+        // Modal functions
+        function openModal() {
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('settingsModal').classList.remove('active');
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return 'No due date';
+            const date = new Date(dateStr);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+
+            if (date.toDateString() === today.toDateString()) return 'Today';
+            if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        // Close modals on outside click
+        document.addEventListener('click', (e) => {
+            const settingsModal = document.getElementById('settingsModal');
+            const editModal = document.getElementById('editModal');
+
+            if (e.target === settingsModal) {
+                closeModal();
+            }
+            if (e.target === editModal) {
+                closeModal();
+            }
+        });
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
